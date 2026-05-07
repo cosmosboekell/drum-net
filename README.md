@@ -67,7 +67,7 @@ It is not an argument that ARPANET wasn't revolutionary. It is an argument that 
 ## How to Deploy (GitHub Pages)
 
 1. Fork or clone this repo
-2. Make sure `index.html` (rename from `drum_net.html`) is in the root
+2. Make sure `index.html` is in the root
 3. Go to **Settings → Pages → Source: main branch / root**
 4. Your live URL will be `https://your-username.github.io/repo-name`
 
