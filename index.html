@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRUM.NET — Social Computing Before ARPANET</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Special+Elite&family=Caveat:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700&family=Press+Start+2P&family=Noto+Sans+Arabic&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+body{
+  background:#080808;
+  color:#d0d0d0;
+  min-height:100vh;
+  font-family:'Special Elite',cursive;
+  overflow-x:hidden;
+  cursor:crosshair;
+}
+
+/* NOISE LAYER */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:var(--noise);
+  background-size:300px 300px;
+  pointer-events:none;z-index:9999;opacity:0.35;
+}
+
+/* SCANLINES */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
+  pointer-events:none;z-index:9998;
+}
+
+/* SCROLLING BG TEXT */
+#bgtext{
+  position:fixed;inset:0;
+  font-family:'VT323',monospace;font-size:11px;
+  color:rgba(255,255,255,0.018);
+  pointer-events:none;z-index:0;
+  white-space:pre;line-height:1.6;letter-spacing:1px;
+  padding:10px;overflow:hidden;
+  animation:bgscroll 80s linear infinite;
+}
+@keyframes bgscroll{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+
+/* RANDOM GLITCH FLASH */
+@keyframes hline{
+  0%,100%{opacity:0;transform:translateY(-100vh) scaleY(0)}
+  50%{opacity:1;transform:translateY(0) scaleY(1)}
+}
+.glitch-line{
+  position:fixed;left:0;right:0;height:2px;
+  background:rgba(255,0,60,0.4);
+  pointer-events:none;z-index:9997;
+  animation:hline 0.1s ease forwards;
+}
+
+/* === HEADER === */
+header{
+  padding:64px 48px 32px;
+  position:relative;z-index:10;
+}
+
+.h1-wrap{position:relative;display:inline-block;}
+
+h1{
+  font-family:'VT323',monospace;
+  font-size:clamp(72px,14vw,148px);
+  color:#fff;line-height:0.88;
+  letter-spacing:-3px;
+  position:relative;display:inline-block;
+}
+
+h1::before,h1::after{
+  content:attr(data-text);
+  position:absolute;top:0;left:0;width:100%;
+}
+h1::before{
+  color:#ff0050;
+  animation:g1 4s infinite;
+  clip-path:polygon(0 15%,100% 15%,100% 40%,0 40%);
+}
+h1::after{
+  color:#00ffee;
+  animation:g2 4s infinite;
+  clip-path:polygon(0 60%,100% 60%,100% 85%,0 85%);
+}
+
+@keyframes g1{
+  0%,85%,100%{transform:translate(0)}
+  86%{transform:translate(-4px,1px)}
+  88%{transform:translate(4px,-1px)}
+  90%{transform:translate(-2px,2px)}
+  92%{transform:translate(3px,-2px)}
+  94%{transform:translate(-1px,1px)}
+  96%{transform:translate(2px,0)}
+}
+@keyframes g2{
+  0%,82%,100%{transform:translate(0)}
+  83%{transform:translate(4px,0)}
+  85%{transform:translate(-4px,1px)}
+  87%{transform:translate(3px,-1px)}
+  89%{transform:translate(-2px,2px)}
+  91%{transform:translate(2px,-1px)}
+  93%{transform:translate(-1px,0)}
+}
+
+.tagdeck{
+  margin-top:20px;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;
+}
+
+.subtitle{
+  font-family:'Special Elite',cursive;
+  font-size:15px;color:#666;
+  line-height:1.7;max-width:560px;letter-spacing:0.3px;
+}
+.subtitle em{color:#FFD700;font-style:normal;}
+
+.manifesto{
+  font-family:'Caveat',cursive;
+  font-size:20px;color:#444;
+  transform:rotate(-1.5deg);
+  display:inline-block;
+  margin-top:4px;max-width:300px;
+  line-height:1.4;
+}
+
+/* === TICKER === */
+.ticker-wrap{
+  overflow:hidden;border-top:1px solid #1a1a1a;border-bottom:1px solid #1a1a1a;
+  padding:10px 0;margin:32px 0 0;position:relative;z-index:10;
+  background:#050505;
+}
+.ticker{
+  display:flex;white-space:nowrap;
+  font-family:'VT323',monospace;font-size:15px;letter-spacing:2px;
+  color:#333;text-transform:uppercase;
+  animation:tick 35s linear infinite;
+}
+.ticker span{margin:0 40px;}
+.ticker .hl{color:#FFD700;}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* === GRID === */
+.grid{
+  display:grid;
+  grid-template-columns:1.1fr 0.9fr 1fr;
+  gap:0;
+  padding:24px 28px 16px;
+  position:relative;z-index:10;
+}
+
+/* === CARDS === */
+.card{
+  padding:26px 24px;margin:10px;
+  cursor:pointer;overflow:hidden;
+  position:relative;transition:transform 0.15s,box-shadow 0.15s;
+}
+.card:hover{transform:scale(1.04) rotate(0deg) !important;z-index:20;}
+.card:hover .cta{opacity:0.6;}
+
+.cta{
+  font-family:'VT323',monospace;font-size:13px;letter-spacing:2px;
+  text-transform:uppercase;opacity:0;transition:opacity 0.3s;
+  position:absolute;bottom:14px;right:18px;
+}
+
+.card-era{
+  font-family:'VT323',monospace;font-size:13px;letter-spacing:3px;
+  text-transform:uppercase;opacity:0.45;margin-bottom:8px;
+}
+.card-name{font-size:20px;font-weight:700;line-height:1.2;margin-bottom:5px;}
+.card-region{
+  font-family:'Caveat',cursive;font-size:17px;opacity:0.5;margin-bottom:10px;
+}
+.card-tagline{
+  font-size:12.5px;line-height:1.6;opacity:0.7;
+  font-style:italic;border-left:2px solid;padding-left:10px;margin-top:10px;
+}
+.mini-viz{height:52px;margin:12px 0;position:relative;overflow:hidden;}
+
+/* individual card themes */
+.c-yoruba{
+  background:#100005;border:2px double #8B0000;
+  font-family:'Cinzel',serif;color:#FFD700;
+  transform:rotate(-2deg);grid-column:1;grid-row:1;
+}
+.c-andean{
+  background:#130800;border:1px solid #6B3500;
+  font-family:'Libre Baskerville',serif;color:#E8C49A;
+  transform:rotate(1.8deg);grid-column:2;grid-row:1;
+  margin-top:50px;
+}
+.c-barid{
+  background:#00021a;border:1px solid #C9A84C;
+  font-family:'Cinzel',serif;color:#5B9FE0;
+  transform:rotate(-0.8deg);grid-column:3;grid-row:1;
+}
+.c-polynesian{
+  background:#00101e;border:1px solid #005f7a;
+  font-family:'Special Elite',cursive;color:#7FE0DA;
+  transform:rotate(2.2deg);grid-column:1;grid-row:2;
+  margin-top:-40px;
+}
+.c-paquete{
+  background:#111000;border:1px dashed #D4C800;
+  font-family:'VT323',monospace;color:#D4C800;
+  transform:rotate(-0.4deg);grid-column:2;grid-row:2;
+  font-size:1.05em;
+}
+.c-arpanet{
+  background:#000;border:1px solid #00cc33;
+  font-family:'VT323',monospace;color:#00FF41;
+  transform:rotate(1.2deg);grid-column:3;grid-row:2;
+  margin-top:30px;
+}
+
+/* === TIMELINE BAR === */
+.timeline{
+  margin:8px 38px 50px;padding:24px 28px;
+  border:1px solid #111;background:#040404;
+  position:relative;z-index:10;
+}
+.tl-title{
+  font-family:'VT323',monospace;font-size:13px;
+  letter-spacing:3px;text-transform:uppercase;color:#333;
+  margin-bottom:20px;
+}
+.tl-row{
+  display:flex;align-items:center;gap:12px;
+  margin:7px 0;font-family:'VT323',monospace;font-size:15px;
+}
+.tl-name{width:220px;color:#555;font-size:14px;letter-spacing:0.5px;}
+.tl-bar{flex:1;height:10px;background:#111;position:relative;overflow:hidden;}
+.tl-fill{height:100%;transition:width 2s cubic-bezier(.16,1,.3,1);}
+.tl-year{width:100px;color:#333;font-size:12px;text-align:right;letter-spacing:1px;}
+
+/* === FOOTER === */
+footer{
+  border-top:1px solid #111;padding:20px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'VT323',monospace;font-size:14px;letter-spacing:1px;color:#2a2a2a;
+  position:relative;z-index:10;
+}
+
+/* === OVERLAY === */
+#overlay{
+  position:fixed;inset:0;z-index:10000;
+  display:none;overflow-y:auto;
+}
+#overlay.open{display:block;animation:oin 0.12s ease;}
+@keyframes oin{from{opacity:0;filter:blur(4px)}to{opacity:1;filter:blur(0)}}
+
+#ov-inner{min-height:100vh;padding:56px 60px 80px;position:relative;}
+#ov-inner::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.1) 2px,rgba(0,0,0,0.1) 4px);
+  pointer-events:none;
+}
+
+#ov-close{
+  position:fixed;top:20px;right:28px;
+  font-family:'VT323',monospace;font-size:26px;letter-spacing:2px;
+  cursor:pointer;padding:6px 14px;border:1px solid currentColor;
+  background:rgba(0,0,0,0.7);transition:all 0.2s;z-index:1;
+}
+#ov-close:hover{background:rgba(255,255,255,0.1);}
+
+#ov-accent{
+  font-family:'VT323',monospace;font-size:12px;letter-spacing:4px;
+  text-transform:uppercase;opacity:0.35;margin-bottom:8px;
+}
+#ov-title{font-size:clamp(36px,7vw,72px);line-height:1;margin-bottom:6px;}
+#ov-region{font-family:'Caveat',cursive;font-size:22px;opacity:0.55;margin-bottom:4px;}
+#ov-era{
+  font-family:'VT323',monospace;font-size:18px;letter-spacing:3px;
+  text-transform:uppercase;opacity:0.4;margin-bottom:36px;
+}
+
+.ov-section{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:32px;margin-bottom:32px;
+}
+@media(max-width:700px){.ov-section{grid-template-columns:1fr}}
+
+.specs-box{
+  border:1px solid rgba(255,255,255,0.15);
+  padding:22px;
+}
+.box-label{
+  font-family:'VT323',monospace;font-size:12px;letter-spacing:3px;
+  text-transform:uppercase;opacity:0.35;margin-bottom:14px;
+}
+.spec-r{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+  font-size:13px;gap:12px;
+}
+.spec-k{
+  font-family:'VT323',monospace;font-size:15px;
+  letter-spacing:1px;text-transform:uppercase;opacity:0.4;
+  flex-shrink:0;
+}
+.spec-v{text-align:right;line-height:1.5;opacity:0.85;max-width:65%;}
+
+.mcl-box{
+  border:2px solid;padding:28px;
+  position:relative;
+}
+.mcl-label{
+  font-family:'VT323',monospace;font-size:11px;letter-spacing:4px;
+  text-transform:uppercase;opacity:0.3;margin-bottom:14px;
+}
+#ov-mcl{
+  font-family:'Libre Baskerville',serif;
+  font-style:italic;font-size:15px;line-height:1.85;min-height:80px;
+}
+
+#ov-insight{
+  font-family:'Caveat',cursive;font-size:21px;line-height:1.5;
+  padding:20px 24px;border-left:4px solid;margin-bottom:32px;
+  opacity:0.85;
+}
+
+#ov-viz{
+  height:160px;position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,0.08);margin-bottom:28px;
+}
+
+/* viz animations */
+@keyframes dpulse{0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.5);opacity:0.15}}
+@keyframes twinkle{0%,100%{opacity:1}50%{opacity:0.1}}
+@keyframes staticflash{0%{opacity:1}50%{opacity:0.5}75%{opacity:0.8}100%{opacity:1}}
+@keyframes nping{0%{transform:scale(1);opacity:1}100%{transform:scale(3);opacity:0}}
+@keyframes chflow{0%{stroke-dashoffset:200}100%{stroke-dashoffset:0}}
+@keyframes starrot{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="bgtext"></div>
+
+<!-- HEADER -->
+<header>
+  <h1 data-text="DRUM.NET">DRUM.NET</h1>
+  <div class="tagdeck">
+    <p class="subtitle">
+      Six social computing networks. Only one gets taught in school.<br>
+      <em>McLuhan said electric media invented the global village.</em><br>
+      The Yoruba would like a word.
+    </p>
+    <p class="manifesto">"privileging the ARPANET-becomes-Internet history has caused us to overlook other forms of networked sociability" — Rankin, 2018</p>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker"></div>
+</div>
+
+<!-- GRID -->
+<div class="grid" id="grid"></div>
+
+<!-- TIMELINE -->
+<div class="timeline">
+  <div class="tl-title">Years of operation before ARPANET's first message (1969) ·· log scale</div>
+  <div id="tlrows"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>DRUM.NET · CCS 26 · Week 7 · Social Computing</span>
+  <span>McLuhan quotes generated &amp; baked · no API key required · no VC funding</span>
+</footer>
+
+<!-- OVERLAY -->
+<div id="overlay">
+  <div id="ov-inner">
+    <div id="ov-close">[ CLOSE / ESC ]</div>
+    <div id="ov-viz"></div>
+    <div id="ov-accent"></div>
+    <div id="ov-title"></div>
+    <div id="ov-region"></div>
+    <div id="ov-era"></div>
+    <div class="ov-section">
+      <div class="specs-box">
+        <div class="box-label">Network Specs</div>
+        <div id="ov-specs"></div>
+      </div>
+      <div class="mcl-box" id="mcl-box">
+        <div class="mcl-label">McLuhan, if he hadn't only read Gutenberg</div>
+        <div id="ov-mcl"></div>
+      </div>
+    </div>
+    <div id="ov-insight"></div>
+  </div>
+</div>
+
+<script>
+const NETWORKS = [
+  {
+    id:'yoruba',
+    cls:'c-yoruba',
+    name:'Yoruba Talking Drum Network',
+    region:'West Africa',
+    era:'~800 CE – present',
+    tagline:'The drum does not carry the message. The drum IS the village.',
+    nativeFrag:'Àgídìgbo · Gángan · Dùndún',
+    bg:'#100005',fg:'#FFD700',acc:'#8B0000',titleFont:'Cinzel',
+    tlStart:-800, tlColor:'#FFD700',
+    specs:{
+      Bandwidth:'High-complexity tonal Yoruba language (2+ pitch levels, rhythm, phrase structure)',
+      Latency:'~15 minutes across 100 miles via relay drummers',
+      Nodes:'500+ communities in Yorubaland alone; relay extended further',
+      Access:'Guild of hereditary master drummers (àlùdùndún)',
+      'Community Structure':'Entire villages; cross-linguistic relay possible via tonal mapping',
+      Protocol:'Tonal language surrogate; each syllable encoded in pitch + duration',
+    },
+    mcl:`The drum does not carry the message. The drum IS the village speaking to itself across space. When a Yoruba master drummer encodes a chief's proverb into tonal pattern, he does not translate — he performs the entire social body through terrain. Every beat is a synapse. Every relay drummer is a router. ARPANET engineers called this "packet switching." The Yoruba called it Tuesday.\n\nAnd unlike ARPANET, it required no defense contracts.`,
+    insight:`In 1969, ARPANET connected 4 nodes. The Yoruba talking drum network connected 500+ communities in real time — and had been doing so for over a thousand years. The medium was the drum. The drum was the village. The village was the internet.`,
+    viz:'drums',
+  },
+  {
+    id:'andean',
+    cls:'c-andean',
+    name:'Andean Quipu + Chasqui Network',
+    region:'South America (Inca Empire)',
+    era:'~1400–1532 CE',
+    tagline:'The khipu is not a record. It is a body. You hold it and it holds you back.',
+    nativeFrag:'Khipu · Chasqui · Qhapaq Ñan',
+    bg:'#130800',fg:'#E8C49A',acc:'#7B3F00',titleFont:'Libre Baskerville',
+    tlStart:-500, tlColor:'#E07B39',
+    specs:{
+      Bandwidth:'Multi-dimensional encoded knot strings (color, twist, plies, position)',
+      Latency:'~240 miles per day via relay runners (chasquis) on mountain roads',
+      Nodes:'Thousands of relay stations (tambos) across the Inca road system',
+      Access:'Trained khipukamayuq (knot-keepers); chasquis ran in relay every ~1.5 miles',
+      'Community Structure':'Imperial administrative + local community record-keeping',
+      Protocol:'Non-linear tactile encoding; may encode narrative, not just numbers',
+    },
+    mcl:`The khipu is not a record. It is a body. You hold it and it holds you back — tactile, non-linear, multi-dimensional. This is the hypertext Ted Nelson dreamed of in 1960 and never finished building. The chasqui runner is the protocol stack. The knot is the data packet. The string is the hyperlink.\n\nUnlike HTML, you cannot right-click and view source. Unlike ARPANET, it survived five hundred years of active colonial suppression before we recognized it as a computing system.`,
+    insight:`Ted Nelson spent 60+ years trying to build non-linear hypertext. The Inca built it with string in the 1400s — tactile, dimensional, traversable. The Spanish burned most of it. We're still decoding what's left.`,
+    viz:'quipu',
+  },
+  {
+    id:'barid',
+    cls:'c-barid',
+    name:'Abbasid Barid Postal System',
+    region:'Middle East, Central Asia, North Africa',
+    era:'750–1258 CE',
+    tagline:'Baghdad to Khorasan in days. Encrypted. Stateful. Redundant.',
+    nativeFrag:'البريد · بغداد · خراسان',
+    bg:'#00021a',fg:'#5B9FE0',acc:'#C9A84C',titleFont:'Cinzel',
+    tlStart:-750, tlColor:'#C9A84C',
+    specs:{
+      Bandwidth:'Full natural language — poetry, intelligence, commerce, legal, diplomatic',
+      Latency:'Baghdad to Khorasan (~3000 km) in approx. 4–7 days via relay horses',
+      Nodes:'Thousands of stations (manzils) at ~4-mile intervals across 3 continents',
+      Access:'State-controlled; expanded access for merchants and scholars over time',
+      'Community Structure':'Imperial nervous system; connected scholars across Islamic world',
+      Protocol:'Relay horse system; cipher-based encryption for sensitive messages',
+    },
+    mcl:`The Abbasid Barid at its height was faster than the Pony Express by eight centuries. The caliph's nervous system stretched across three continents carrying simultaneously what every network humans have ever built carries: poetry, intelligence, commerce, and gossip.\n\nWhen Licklider wrote in 1968 of "geographically separated people" finding community through machines, he was rediscovering what al-Mansur's postmasters already knew in 762 CE. The medium was the horse. The message was the empire. The community was a civilization.`,
+    insight:`The Abbasid Barid connected scholars from Baghdad to Cordoba to Samarkand in a single knowledge network — sharing manuscripts, translations, and discoveries. The Islamic Golden Age ran on this infrastructure. Licklider called this vision "future." Al-Mansur called it Tuesday.`,
+    viz:'star',
+  },
+  {
+    id:'polynesian',
+    cls:'c-polynesian',
+    name:'Polynesian Wayfinding Network',
+    region:'Pacific Ocean',
+    era:'~800–1300 CE (peak expansion)',
+    tagline:'The navigator is the instrument. The ocean is the interface.',
+    nativeFrag:'Mālama · Hōkūleʻa · Te Lapa',
+    bg:'#00101e',fg:'#7FE0DA',acc:'#005f7a',titleFont:'Special Elite',
+    tlStart:-800, tlColor:'#7FE0DA',
+    specs:{
+      Bandwidth:'Full cultural knowledge: navigation, genealogy, ecological, astronomical',
+      Latency:'~3-4 weeks Tahiti to Hawaiʻi (~4,000 km) via double-hulled voyaging canoe',
+      Nodes:'Islands across 10 million sq miles of Pacific; 1000+ inhabited islands',
+      Access:'Community of trained navigators; knowledge held collectively + orally',
+      'Community Structure':'Distributed knowledge system; no single center or server',
+      Protocol:'Embodied: star paths, wave patterns, swell direction, bird behavior, phosphorescence',
+    },
+    mcl:`The Pacific navigator does not use instruments. The navigator IS the instrument. The body reads wave period, star azimuth, swell direction, wind shift, and seabird behavior as data packets arriving continuously. The mnemonic chant encoding the star path is the source code.\n\nMcLuhan said electric media recreated tribal consciousness and the global village. He forgot that tribal consciousness had already built a functioning ocean-spanning internet two thousand years before Licklider. No server. No node. No off switch. No DARPA contract.`,
+    insight:`The Polynesian wayfinding network spanned 10 million square miles with no physical infrastructure — only trained human bodies, oral knowledge systems, and the ocean itself. It was a distributed, peer-to-peer, fault-tolerant network. We called it "lost knowledge." They called it navigation.`,
+    viz:'stars',
+  },
+  {
+    id:'paquete',
+    cls:'c-paquete',
+    name:'El Paquete Semanal',
+    region:'Cuba',
+    era:'~2008 CE – present',
+    tagline:'The embargo couldn\'t stop the terabyte. The medium is a human body walking through Havana.',
+    nativeFrag:'El Paquete · La Calle · Los Pipas',
+    bg:'#111000',fg:'#D4C800',acc:'#8B0000',titleFont:'VT323',
+    tlStart:2008, tlColor:'#CC0000',
+    specs:{
+      Bandwidth:'~1 TB per week of curated content (films, TV, apps, music, classifieds)',
+      Latency:'New content available every Friday; weekly update cycle',
+      Nodes:'Estimated 1M+ Cubans receive weekly; neighborhood distributors across island',
+      Access:'Small fee (~$1–2 CUC); accessible without internet or electricity beyond TV',
+      'Community Structure':'Horizontal distribution network; prosumers curate + redistribute',
+      Protocol:'Physical hand-delivery via external hard drives and USB sticks; no internet',
+    },
+    mcl:`El Paquete is the internet refusing to be stopped by an embargo. Every Friday, a courier arrives with a terabyte of culture: pirated Netflix, medical textbooks, dating classifieds, telenovelas, and memes. The medium is a human body walking through Havana with a bag.\n\nSilicon Valley spent fifty years building walls called "platforms." Cuba built a sneakernet and called it community. Licklider imagined people creating "interactive communities of geographically separated people" through computers. El Paquete does it without the internet. Which community is more real?`,
+    insight:`El Paquete Semanal is a fully functional social computing network operating entirely offline — bypassing the US embargo, bypassing the Cuban state's internet controls, bypassing every assumption Licklider made about what "the computer" needs to be. The medium is a person. The message is: we are still here.`,
+    viz:'static',
+  },
+  {
+    id:'arpanet',
+    cls:'c-arpanet',
+    name:'ARPANET',
+    region:'United States (DoD)',
+    era:'1969–1990 CE',
+    tagline:'The first message was "LO." The system crashed after two letters.',
+    nativeFrag:'LOGIN · SRI · UCLA · UCSB · UTAH',
+    bg:'#000000',fg:'#00FF41',acc:'#004411',titleFont:'VT323',
+    tlStart:1969, tlColor:'#00FF41',
+    specs:{
+      Bandwidth:'Initially 50 kbps; text-based; later expanded',
+      Latency:'Near-real-time for connected nodes; initially just 4 universities',
+      Nodes:'4 nodes at launch (UCLA, SRI, UCSB, Utah); grew to 213 by 1981',
+      Access:'Defense-funded researchers at select universities; heavily gatekept',
+      'Community Structure':'Graduate students + researchers; explicitly military-academic',
+      Protocol:'NCP, later TCP/IP; packet switching across telephone lines',
+    },
+    mcl:`Four nodes. UCLA, Stanford, UCSB, Utah. Defense money. Graduate students. The year: 1969. The first message ever sent across this network was "LO" — they tried to send "LOGIN" and the system crashed. The medium announced its own incompleteness.\n\nWithin a decade they called the users a community. Within three decades they called it the world. Meanwhile the Yoruba had been doing this for a thousand years, Polynesian navigators for two thousand, and the Inca had built a tactile hypertext system five centuries prior. The difference: ARPANET got written down by people who looked like Licklider, and those people wrote the history books.`,
+    insight:`ARPANET was genuinely revolutionary. It was also not the first. It was also not the only. And it was funded by a military agency trying to survive nuclear war — not by any desire for human community. The community came later, from the graduate students who hijacked it. Sound familiar? (See: PLATO.)`,
+    viz:'nodes',
+  },
+];
+
+const TICKER_TEXT = [
+  '4 NODES · ARPANET · 1969',
+  '500+ COMMUNITIES · YORUBA DRUM NETWORK · ~800 CE',
+  'THE FIRST MESSAGE WAS "LO." THE SYSTEM CRASHED.',
+  'البريد · ABBASID BARID · FASTER THAN PONY EXPRESS BY 8 CENTURIES',
+  '10 MILLION SQUARE MILES · NO INFRASTRUCTURE · NO SERVER',
+  'EL PAQUETE SEMANAL · 1 TERABYTE WEEKLY · NO INTERNET',
+  'KHIPU · THE HYPERTEXT TED NELSON NEVER BUILT',
+  '"THE MEDIUM IS THE MASSAGE" — MCLUHAN FORGOT THE DRUM',
+  'SOCIAL COMPUTING DID NOT BEGIN IN CALIFORNIA',
+];
+
+// Build ticker
+const ticker = document.getElementById('ticker');
+const fullTicker = [...TICKER_TEXT,...TICKER_TEXT].map(t=>
+  `<span>${t.includes('ARPANET')||t.includes('LO')||t.includes('CALIFORNIA')
+    ?`<span class="hl">${t}</span>`:t}</span>`
+).join('');
+ticker.innerHTML = fullTicker + fullTicker;
+
+// Build grid
+const grid = document.getElementById('grid');
+NETWORKS.forEach(n=>{
+  const card = document.createElement('div');
+  card.className = `card ${n.cls}`;
+  card.innerHTML = `
+    <div class="card-era">${n.era}</div>
+    <div class="card-name">${n.name}</div>
+    <div class="card-region">${n.region}</div>
+    <div class="mini-viz" id="mv-${n.id}"></div>
+    <div class="card-tagline">${n.tagline}</div>
+    <div style="font-family:Caveat,cursive;font-size:13px;opacity:0.25;margin-top:8px;">${n.nativeFrag}</div>
+    <div class="cta">[ OPEN ]</div>
+  `;
+  card.addEventListener('click',()=>openOverlay(n));
+  grid.appendChild(card);
+  buildMiniViz(n);
+});
+
+// Build mini visualizations
+function buildMiniViz(n){
+  const el = document.getElementById(`mv-${n.id}`);
+  if(n.viz==='drums'){
+    const svg = `<svg width="100%" height="52" xmlns="http://www.w3.org/2000/svg">
+      ${[24,18,12,6].map((r,i)=>`<circle cx="30" cy="26" r="${r}" fill="none" stroke="#FFD700" stroke-width="0.8" opacity="${0.9-i*0.2}" style="animation:dpulse ${1.2+i*0.4}s ease-in-out ${i*0.3}s infinite"/>`).join('')}
+      ${[24,18,12,6].map((r,i)=>`<circle cx="80" cy="26" r="${r}" fill="none" stroke="#8B0000" stroke-width="0.8" opacity="${0.8-i*0.2}" style="animation:dpulse ${1.4+i*0.3}s ease-in-out ${i*0.2}s infinite"/>`).join('')}
+      <line x1="54" y1="26" x2="56" y2="26" stroke="#FFD700" stroke-width="1" opacity="0.4"/>
+    </svg>`;
+    el.innerHTML=svg;
+  } else if(n.viz==='quipu'){
+    let lines='';
+    for(let i=0;i<8;i++){
+      const x=20+i*14, h=15+Math.random()*25, ky=5+Math.random()*h;
+      lines+=`<line x1="${x}" y1="2" x2="${x}" y2="${h}" stroke="#E07B39" stroke-width="1.5"/>
+      <circle cx="${x}" cy="${ky}" r="3" fill="#4ECDC4"/>`;
+    }
+    el.innerHTML=`<svg width="100%" height="52" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="2" x2="130" y2="2" stroke="#E07B39" stroke-width="2"/>${lines}</svg>`;
+  } else if(n.viz==='star'){
+    const pts=6,cx=40,cy=26,r=18;
+    let poly='';
+    for(let i=0;i<pts;i++){
+      const a=i*Math.PI/3-Math.PI/2;
+      const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
+      const x2=cx+(r/2)*Math.cos(a+Math.PI/pts), y2=cy+(r/2)*Math.sin(a+Math.PI/pts);
+      poly+=`${x},${y} ${x2},${y2} `;
+    }
+    el.innerHTML=`<svg width="100%" height="52" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="${poly.trim()}" fill="none" stroke="#C9A84C" stroke-width="1" opacity="0.8"/>
+      <circle cx="40" cy="26" r="3" fill="#C9A84C" opacity="0.5"/>
+    </svg>`;
+  } else if(n.viz==='stars'){
+    let dots='';
+    const pts=[[15,8],[35,20],[55,5],[80,14],[100,30],[45,38],[70,42]];
+    pts.forEach(([x,y],i)=>{
+      dots+=`<circle cx="${x}" cy="${y}" r="2" fill="#7FE0DA" style="animation:twinkle ${1.5+i*0.4}s ease-in-out ${i*0.2}s infinite"/>`;
+    });
+    let lines='';
+    [[0,1],[1,2],[2,3],[3,4],[1,5],[5,6],[4,6]].forEach(([a,b])=>{
+      lines+=`<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" stroke="#7FE0DA" stroke-width="0.5" opacity="0.2"/>`;
+    });
+    el.innerHTML=`<svg width="100%" height="52" xmlns="http://www.w3.org/2000/svg">${lines}${dots}</svg>`;
+  } else if(n.viz==='static'){
+    let rects='';
+    for(let i=0;i<40;i++){
+      const x=Math.random()*120, y=Math.random()*50, w=2+Math.random()*8, h=1+Math.random()*3;
+      const op=Math.random()*0.6;
+      rects+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#D4C800" opacity="${op}" style="animation:staticflash ${0.3+Math.random()*0.7}s step-end ${Math.random()}s infinite"/>`;
+    }
+    el.innerHTML=`<svg width="100%" height="52" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`;
+  } else if(n.viz==='nodes'){
+    const nodes=[[20,26],[70,10],[70,42],[120,26]];
+    const edges=[[0,1],[0,2],[1,3],[2,3]];
+    let lines='',circles='',pings='';
+    edges.forEach(([a,b])=>{
+      lines+=`<line x1="${nodes[a][0]}" y1="${nodes[a][1]}" x2="${nodes[b][0]}" y2="${nodes[b][1]}" stroke="#00FF41" stroke-width="0.8" opacity="0.4" stroke-dasharray="3,3"/>`;
+    });
+    nodes.forEach(([x,y],i)=>{
+      circles+=`<circle cx="${x}" cy="${y}" r="5" fill="#00FF41" opacity="0.8"/>`;
+      pings+=`<circle cx="${x}" cy="${y}" r="5" fill="none" stroke="#00FF41" style="animation:nping ${2+i*0.5}s ease-out ${i*0.4}s infinite"/>`;
+    });
+    el.innerHTML=`<svg width="100%" height="52" xmlns="http://www.w3.org/2000/svg">${lines}${pings}${circles}</svg>`;
+  }
+}
+
+// Build timeline
+const tlRows = document.getElementById('tlrows');
+const networks_sorted = [...NETWORKS].sort((a,b)=>a.tlStart-b.tlStart);
+networks_sorted.forEach(n=>{
+  const yearsBeforeArpanet = n.id==='arpanet'?0:Math.max(0,1969-n.tlStart);
+  const pct = n.id==='paquete'?3:Math.min(95, (Math.log10(yearsBeforeArpanet+1)/Math.log10(2200))*95);
+  const label = n.id==='arpanet'?'Year zero (1969)':
+    n.id==='paquete'?'After ARPANET':
+    `~${yearsBeforeArpanet.toLocaleString()} years prior`;
+  const row = document.createElement('div');
+  row.className='tl-row';
+  row.innerHTML=`
+    <div class="tl-name">${n.name.split(' ').slice(0,3).join(' ')}</div>
+    <div class="tl-bar"><div class="tl-fill" style="width:0%;background:${n.tlColor};opacity:0.7" data-pct="${pct}"></div></div>
+    <div class="tl-year">${label}</div>
+  `;
+  tlRows.appendChild(row);
+});
+// Animate bars on scroll
+const ob = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.tl-fill').forEach(f=>{
+        setTimeout(()=>f.style.width=f.dataset.pct+'%',100);
+      });
+      ob.unobserve(e.target);
+    }
+  });
+},{threshold:0.3});
+ob.observe(tlRows);
+
+// Overlay
+const overlay = document.getElementById('overlay');
+const ovInner = document.getElementById('ov-inner');
+
+function openOverlay(n){
+  overlay.className='open';
+  overlay.style.display='block';
+
+  ovInner.style.background=n.bg;
+  ovInner.style.color=n.fg;
+
+  document.getElementById('ov-accent').textContent=n.region.toUpperCase()+' · SOCIAL COMPUTING NETWORK';
+  document.getElementById('ov-title').textContent=n.name;
+  document.getElementById('ov-title').style.fontFamily=n.titleFont+',serif';
+  document.getElementById('ov-region').textContent=n.nativeFrag;
+  document.getElementById('ov-era').textContent=n.era;
+  document.getElementById('ov-insight').textContent=n.insight;
+  document.getElementById('ov-insight').style.borderColor=n.fg;
+  document.getElementById('ov-close').style.color=n.fg;
+  document.getElementById('mcl-box').style.borderColor=n.fg;
+
+  // Specs
+  const specsEl=document.getElementById('ov-specs');
+  specsEl.innerHTML=Object.entries(n.specs).map(([k,v])=>
+    `<div class="spec-r"><span class="spec-k">${k}</span><span class="spec-v">${v}</span></div>`
+  ).join('');
+
+  // McLuhan typewriter
+  const mclEl=document.getElementById('ov-mcl');
+  mclEl.textContent='';
+  let i=0;
+  const txt=n.mcl;
+  function type(){
+    if(i<txt.length){
+      mclEl.textContent+=txt[i];i++;
+      setTimeout(type,i<20?0:Math.random()<0.05?80:10);
+    }
+  }
+  type();
+
+  // Overlay viz
+  buildOverlayViz(n);
+
+  overlay.scrollTop=0;
+}
+
+function buildOverlayViz(n){
+  const el=document.getElementById('ov-viz');
+  el.style.background=n.bg;
+  if(n.viz==='drums'){
+    let circles='';
+    for(let i=0;i<6;i++){
+      const r=15+i*18, delay=i*0.25;
+      circles+=`<circle cx="160" cy="80" r="${r}" fill="none" stroke="#FFD700" stroke-width="1" opacity="${0.9-i*0.13}" style="animation:dpulse ${1.5+i*0.3}s ease-in-out ${delay}s infinite"/>`;
+      circles+=`<circle cx="500" cy="80" r="${r}" fill="none" stroke="#8B0000" stroke-width="1" opacity="${0.8-i*0.1}" style="animation:dpulse ${1.3+i*0.35}s ease-in-out ${delay+0.2}s infinite"/>`;
+    }
+    const relays=[['260',80],['330',80],['400',80]];
+    const relayDots=relays.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="4" fill="#FFD700" opacity="0.5"/>`).join('');
+    const relayLines=[[160,260],[260,330],[330,400],[400,500]].map(([x1,x2])=>
+      `<line x1="${x1}" y1="80" x2="${x2}" y2="80" stroke="#FFD700" stroke-width="0.5" opacity="0.2" stroke-dasharray="4,4"/>`).join('');
+    el.innerHTML=`<svg width="100%" height="160" xmlns="http://www.w3.org/2000/svg">${circles}${relayLines}${relayDots}</svg>`;
+  } else if(n.viz==='quipu'){
+    let knots='';
+    for(let i=0;i<14;i++){
+      const x=50+i*45, hh=20+Math.random()*90, kc=Math.floor(1+Math.random()*3);
+      knots+=`<line x1="${x}" y1="20" x2="${x}" y2="${hh}" stroke="#E07B39" stroke-width="2"/>`;
+      for(let k=0;k<kc;k++){
+        const ky=25+k*(hh-25)/kc;
+        knots+=`<circle cx="${x}" cy="${ky}" r="4" fill="${['#4ECDC4','#E07B39','#8B4513'][k%3]}"/>`;
+      }
+    }
+    el.innerHTML=`<svg width="100%" height="160" xmlns="http://www.w3.org/2000/svg">
+      <line x1="30" y1="20" x2="660" y2="20" stroke="#E07B39" stroke-width="3"/>
+      ${knots}
+    </svg>`;
+  } else if(n.viz==='star'){
+    const rings=5, cx=330, cy=80;
+    let els='';
+    for(let r=0;r<rings;r++){
+      const rad=(r+1)*22;
+      for(let p=0;p<(r+1)*4;p++){
+        const a=(p/(r+1)/4)*Math.PI*2;
+        els+=`<circle cx="${cx+rad*Math.cos(a)}" cy="${cy+rad*Math.sin(a)}" r="1.5" fill="#C9A84C" opacity="${0.8-r*0.15}"/>`;
+      }
+      els+=`<circle cx="${cx}" cy="${cy}" r="${rad}" fill="none" stroke="#C9A84C" stroke-width="0.3" opacity="${0.3-r*0.05}"/>`;
+    }
+    const pts=8,outer=110,inner=50;
+    let starPoly='';
+    for(let i=0;i<pts*2;i++){
+      const r=i%2===0?outer:inner;
+      const a=i*Math.PI/pts-Math.PI/2;
+      starPoly+=`${cx+r*Math.cos(a)},${cy+r*Math.sin(a)} `;
+    }
+    els=`<polygon points="${starPoly.trim()}" fill="none" stroke="#C9A84C" stroke-width="1" opacity="0.5" style="transform-origin:${cx}px ${cy}px;animation:starrot 20s linear infinite"/>`+els;
+    el.innerHTML=`<svg width="100%" height="160" xmlns="http://www.w3.org/2000/svg">${els}</svg>`;
+  } else if(n.viz==='stars'){
+    const stars=[];
+    for(let i=0;i<30;i++) stars.push([Math.random()*660,Math.random()*160]);
+    const constellations=[[0,1],[1,2],[2,4],[4,7],[7,0],[3,5],[5,9],[9,12],[6,8],[8,11]].filter(([a,b])=>b<stars.length);
+    const lines=constellations.map(([a,b])=>
+      `<line x1="${stars[a][0]}" y1="${stars[a][1]}" x2="${stars[b][0]}" y2="${stars[b][1]}" stroke="#7FE0DA" stroke-width="0.4" opacity="0.25"/>`
+    ).join('');
+    const dots=stars.map(([x,y],i)=>
+      `<circle cx="${x}" cy="${y}" r="${i<8?3:1.5}" fill="#7FE0DA" style="animation:twinkle ${1.5+Math.random()*2}s ease-in-out ${Math.random()*2}s infinite"/>`
+    ).join('');
+    el.innerHTML=`<svg width="100%" height="160" xmlns="http://www.w3.org/2000/svg">${lines}${dots}</svg>`;
+  } else if(n.viz==='static'){
+    let rects='';
+    for(let i=0;i<120;i++){
+      const x=Math.random()*660, y=Math.random()*160, w=2+Math.random()*20, h=1+Math.random()*6;
+      rects+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#D4C800" opacity="${Math.random()*0.7}" style="animation:staticflash ${0.2+Math.random()*0.6}s step-end ${Math.random()*0.5}s infinite"/>`;
+    }
+    el.innerHTML=`<svg width="100%" height="160" xmlns="http://www.w3.org/2000/svg">
+      <text x="330" y="90" text-anchor="middle" fill="#D4C800" opacity="0.15" style="font-family:VT323,monospace;font-size:24px;letter-spacing:4px">EL PAQUETE SEMANAL</text>
+      ${rects}
+    </svg>`;
+  } else if(n.viz==='nodes'){
+    const pos=[[100,80],[300,30],[300,130],[550,80]];
+    const edges=[[0,1],[0,2],[1,3],[2,3],[1,2]];
+    const lines=edges.map(([a,b])=>
+      `<line x1="${pos[a][0]}" y1="${pos[a][1]}" x2="${pos[b][0]}" y2="${pos[b][1]}" stroke="#00FF41" stroke-width="1" opacity="0.35" stroke-dasharray="6,4"/>`
+    ).join('');
+    const lbls=['UCLA','SRI','UCSB','Utah'];
+    const circles=pos.map(([x,y],i)=>
+      `<circle cx="${x}" cy="${y}" r="10" fill="#001a00" stroke="#00FF41" stroke-width="1.5"/>
+       <circle cx="${x}" cy="${y}" r="10" fill="none" stroke="#00FF41" stroke-width="8" opacity="0.05" style="animation:nping ${2+i*0.5}s ease-out ${i*0.5}s infinite"/>
+       <text x="${x}" y="${y+30}" text-anchor="middle" fill="#00FF41" opacity="0.5" style="font-family:VT323,monospace;font-size:14px">${lbls[i]}</text>`
+    ).join('');
+    el.innerHTML=`<svg width="100%" height="160" xmlns="http://www.w3.org/2000/svg">
+      <text x="330" y="155" text-anchor="middle" fill="#00FF41" opacity="0.08" style="font-family:VT323,monospace;font-size:11px;letter-spacing:3px">FIRST MESSAGE: "LO" · SYSTEM CRASHED</text>
+      ${lines}${circles}
+    </svg>`;
+  }
+}
+
+// Close overlay
+document.getElementById('ov-close').addEventListener('click',()=>{
+  overlay.className='';overlay.style.display='none';
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){overlay.className='';overlay.style.display='none';}
+});
+
+// Background text
+const bglines=[];
+const bgFrags=[
+  'THE MEDIUM IS THE MASSAGE','DRUM NET','SOCIAL COMPUTING',
+  'الشبكة','INTERTWINGULARITY','KHIPU NETWORK','CHASQUI PROTOCOL',
+  'VIRTUAL COMMUNITY','EL PAQUETE','PACKET SWITCHING','0100 1100 4F',
+  'LOGIN...SYSTEM CRASH','BARID','HOKULEʻA','DUNDIN DRUM',
+  'ARPANET 4 NODES','YORUBA 500+ NODES','DISTRIBUTED','PEER TO PEER',
+  '1969','800 CE','750 CE','1400 CE','2008 CE',
+];
+for(let r=0;r<120;r++){
+  let line='';
+  while(line.length<140) line+=bgFrags[Math.floor(Math.random()*bgFrags.length)]+' · ';
+  bglines.push(line);
+}
+const fullbg=[...bglines,...bglines].join('\n');
+document.getElementById('bgtext').textContent=fullbg;
+
+// Random glitch line flashes
+setInterval(()=>{
+  if(Math.random()>0.85){
+    const line=document.createElement('div');
+    line.className='glitch-line';
+    line.style.top=Math.random()*100+'vh';
+    document.body.appendChild(line);
+    setTimeout(()=>line.remove(),120);
+  }
+},1800);
+</script>
+</body>
+</html>
