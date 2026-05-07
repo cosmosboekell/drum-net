@@ -6,7 +6,7 @@
 
 ---
 
-**[→ Live Demo](https://your-username.github.io/drum-net)**
+**[→ Live Demo](https://cosmosboekell.github.io/drum-net/)**
 
 ---
 
@@ -86,4 +86,4 @@ Everything runs client-side. No build step. No dependencies. No backend.
 
 ---
 
-*Made with Claude (vibe coded) · CCS 26 · Week 7 · University of Chicago*
+*Made with Claude (vibe coded) · HIPS 18504 Spring 26 · Week 7 · University of Chicago*
